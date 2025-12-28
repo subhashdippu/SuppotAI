@@ -2,12 +2,14 @@
 
 var express = require("express");
 
+var connectDB = require("./config/db");
+
+require("dotenv").config();
+
 var app = express();
-var PORT = process.env.PORT || 3000;
+connectDB();
 app.use(express.json());
-app.get("/", function (req, res) {
-  res.send("Hello, Node.js!");
-});
+var PORT = process.env.PORT || 5001;
 app.listen(PORT, function () {
-  console.log("Server is running on ".concat(PORT));
+  return console.log("Server running on port ".concat(PORT));
 });
