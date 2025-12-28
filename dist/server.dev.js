@@ -1,0 +1,13 @@
+"use strict";
+
+var express = require("express");
+
+var app = express();
+var PORT = process.env.PORT || 3000;
+app.use(express.json());
+app.get("/", function (req, res) {
+  res.send("Hello, Node.js!");
+});
+app.listen(PORT, function () {
+  console.log("Server is running on ".concat(PORT));
+});
