@@ -1,42 +1,58 @@
 "use strict";
 
-var _require = require("../services/chat"),
-    handleChat = _require.handleChat;
+var _require = require("../utils/validate"),
+    validateMessage = _require.validateMessage;
 
-function chatMessage(req, res) {
-  var _req$body, message, sessionId, result;
+var chatService = require("../services/chat");
 
-  return regeneratorRuntime.async(function chatMessage$(_context) {
+function sendMessage(req, res, next) {
+  var _req$body, message, sessionId, error, result;
+
+  return regeneratorRuntime.async(function sendMessage$(_context) {
     while (1) {
       switch (_context.prev = _context.next) {
         case 0:
+          _context.prev = 0;
           _req$body = req.body, message = _req$body.message, sessionId = _req$body.sessionId;
+          error = validateMessage(message);
 
-          if (!(!message || !message.trim())) {
-            _context.next = 3;
+          if (!error) {
+            _context.next = 5;
             break;
           }
 
           return _context.abrupt("return", res.status(400).json({
-            error: "Message cannot be empty"
+            success: false,
+            message: error
           }));
 
-        case 3:
-          _context.next = 5;
-          return regeneratorRuntime.awrap(handleChat(message.trim(), sessionId));
-
         case 5:
-          result = _context.sent;
-          res.json(result);
+          _context.next = 7;
+          return regeneratorRuntime.awrap(chatService.handleMessage(message, sessionId));
 
         case 7:
+          result = _context.sent;
+          res.json({
+            success: true,
+            reply: result.reply,
+            sessionId: result.sessionId
+          });
+          _context.next = 14;
+          break;
+
+        case 11:
+          _context.prev = 11;
+          _context.t0 = _context["catch"](0);
+          next(_context.t0);
+
+        case 14:
         case "end":
           return _context.stop();
       }
     }
-  });
+  }, null, null, [[0, 11]]);
 }
 
 module.exports = {
-  chatMessage: chatMessage
+  sendMessage: sendMessage
 };

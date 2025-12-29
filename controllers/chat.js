@@ -1,14 +1,25 @@
-const { handleChat } = require("../services/chat");
+const { validateMessage } = require("../utils/validate");
+const chatService = require("../services/chat");
 
-async function chatMessage(req, res) {
-  const { message, sessionId } = req.body;
+async function sendMessage(req, res, next) {
+  try {
+    const { message, sessionId } = req.body;
 
-  if (!message || !message.trim()) {
-    return res.status(400).json({ error: "Message cannot be empty" });
+    const error = validateMessage(message);
+    if (error) {
+      return res.status(400).json({ success: false, message: error });
+    }
+
+    const result = await chatService.handleMessage(message, sessionId);
+
+    res.json({
+      success: true,
+      reply: result.reply,
+      sessionId: result.sessionId,
+    });
+  } catch (err) {
+    next(err);
   }
-
-  const result = await handleChat(message.trim(), sessionId);
-  res.json(result);
 }
 
-module.exports = { chatMessage };
+module.exports = { sendMessage };

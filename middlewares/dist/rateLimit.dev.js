@@ -1,6 +1,6 @@
 "use strict";
 
-var redis = require("../config/redis");
+var redis = require("../configs/redis");
 
 var WINDOW_SECONDS = 60;
 var MAX_REQUESTS = 20;

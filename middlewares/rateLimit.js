@@ -1,4 +1,4 @@
-const redis = require("../config/redis");
+const redis = require("../configs/redis");
 
 const WINDOW_SECONDS = 60;
 const MAX_REQUESTS = 20;
