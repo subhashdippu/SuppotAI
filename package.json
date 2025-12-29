@@ -15,5 +15,8 @@
     "mongoose": "^8.19.1",
     "openai": "^6.15.0",
     "redis": "^5.10.0"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.19"
   }
 }
