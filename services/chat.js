@@ -1,5 +1,5 @@
 const Conversation = require("../models/conversation");
-const Message = require("../models/,message");
+const Message = require("../models/message");
 const { generateReply } = require("./llm");
 const { getContext, setContext } = require("./cache");
 

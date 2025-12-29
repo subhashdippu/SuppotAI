@@ -1,6 +1,6 @@
 "use strict";
 
-var _require = require("../config/redis"),
+var _require = require("../configs/redis"),
     getRedis = _require.getRedis;
 
 var CONTEXT_LIMIT = 10;

@@ -1,4 +1,4 @@
-const { getRedis } = require("../config/redis");
+const { getRedis } = require("../configs/redis");
 
 const CONTEXT_LIMIT = 10;
 const TTL = 1800;

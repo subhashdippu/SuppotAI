@@ -15,4 +15,7 @@ async function connectRedis() {
   return redisClient;
 }
 
-module.exports = { connectRedis };
+function getRedis() {
+  return redisClient;
+}
+module.exports = { connectRedis, getRedis };

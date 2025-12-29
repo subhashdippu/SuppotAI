@@ -33,6 +33,11 @@ function connectRedis() {
   });
 }
 
+function getRedis() {
+  return redisClient;
+}
+
 module.exports = {
-  connectRedis: connectRedis
+  connectRedis: connectRedis,
+  getRedis: getRedis
 };

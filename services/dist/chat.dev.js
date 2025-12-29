@@ -10,7 +10,7 @@ function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
 var Conversation = require("../models/conversation");
 
-var Message = require("../models/,message");
+var Message = require("../models/message");
 
 var _require = require("./llm"),
     generateReply = _require.generateReply;

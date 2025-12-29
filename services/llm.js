@@ -1,15 +1,22 @@
-const OpenAI = require("openai");
+const Groq = require("groq-sdk");
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+const groq = new Groq({
+  apiKey: process.env.GROQ_API_KEY,
 });
 
 const SYSTEM_PROMPT = `
-You are a e-commerce support agent.
+You are a helpful customer support agent for a small e-commerce store.
 
-Shipping: Worldwide (5–10 business days)
-Returns: 30-day return window
-Support: Mon–Fri, 9AM–6PM IST
+Store policies:
+- Shipping: We ship worldwide. Delivery takes 5–10 business days.
+- Returns: 30-day return window for unused products.
+- Refunds: Refunds processed within 5 business days.
+- Support hours: Monday–Friday, 9 AM–6 PM IST.
+
+Guidelines:
+- Be concise and friendly
+- Answer clearly
+- If unsure, say you will connect to human support
 `;
 
 async function generateReply(history, userMessage) {
@@ -20,19 +27,21 @@ async function generateReply(history, userMessage) {
         role: m.sender === "user" ? "user" : "assistant",
         content: m.text,
       })),
+
       { role: "user", content: userMessage },
     ];
 
-    const res = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+    const completion = await groq.chat.completions.create({
+      model: "llama-3.1-8b-instant",
       messages,
       max_tokens: 200,
+      temperature: 0.3,
     });
 
-    return res.choices[0].message.content;
-  } catch (err) {
-    console.error("LLM error:", err.message);
-    return "Sorry, I'm having trouble responding right now.";
+    return completion.choices[0].message.content;
+  } catch (error) {
+    console.error("LLM error:", error.message);
+    return "Sorry, our support agent is temporarily unavailable.";
   }
 }
 
