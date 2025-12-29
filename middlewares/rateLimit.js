@@ -1,30 +1,25 @@
-const redis = require("../configs/redis");
+const { getRedis } = require("../configs/redis");
 
-const WINDOW_SECONDS = 60;
-const MAX_REQUESTS = 20;
+const rateLimit = async (req, res, next) => {
+  const redis = getRedis(); // ✅ actual client
 
-async function rateLimit(req, res, next) {
-  try {
-    const key = `rate:${req.ip}`;
-
-    const current = await redis.incr(key);
-
-    if (current === 1) {
-      await redis.expire(key, WINDOW_SECONDS);
-    }
-
-    if (current > MAX_REQUESTS) {
-      return res.status(429).json({
-        success: false,
-        message: "Too many requests. Please slow down.",
-      });
-    }
-
-    next();
-  } catch (err) {
-    console.error("Rate limit error:", err.message);
-    next();
+  if (!redis) {
+    return res.status(500).json({ message: "Redis not connected" });
   }
-}
+
+  const key = `rate:${req.ip}`;
+
+  const count = await redis.incr(key); // ✅ works
+
+  if (count === 1) {
+    await redis.expire(key, 60);
+  }
+
+  if (count > 100) {
+    return res.status(429).json({ message: "Too many requests" });
+  }
+
+  next();
+};
 
 module.exports = rateLimit;

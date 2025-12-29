@@ -19,9 +19,9 @@ var _require2 = require("./cache"),
     getContext = _require2.getContext,
     setContext = _require2.setContext;
 
-function handleChat(message, sessionId) {
+function handleMessage(message, sessionId) {
   var conversation, conversationId, history, reply;
-  return regeneratorRuntime.async(function handleChat$(_context) {
+  return regeneratorRuntime.async(function handleMessage$(_context) {
     while (1) {
       switch (_context.prev = _context.next) {
         case 0:
@@ -124,5 +124,5 @@ function handleChat(message, sessionId) {
 }
 
 module.exports = {
-  handleChat: handleChat
+  handleMessage: handleMessage
 };

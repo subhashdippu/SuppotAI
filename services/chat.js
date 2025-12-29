@@ -3,7 +3,7 @@ const Message = require("../models/message");
 const { generateReply } = require("./llm");
 const { getContext, setContext } = require("./cache");
 
-async function handleChat(message, sessionId) {
+async function handleMessage(message, sessionId) {
   let conversation = sessionId ? await Conversation.findById(sessionId) : null;
 
   if (!conversation) {
@@ -44,4 +44,4 @@ async function handleChat(message, sessionId) {
   return { reply, sessionId: conversationId };
 }
 
-module.exports = { handleChat };
+module.exports = { handleMessage };

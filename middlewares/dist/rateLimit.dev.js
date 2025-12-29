@@ -1,60 +1,60 @@
 "use strict";
 
-var redis = require("../configs/redis");
+var _require = require("../configs/redis"),
+    getRedis = _require.getRedis;
 
-var WINDOW_SECONDS = 60;
-var MAX_REQUESTS = 20;
-
-function rateLimit(req, res, next) {
-  var key, current;
+var rateLimit = function rateLimit(req, res, next) {
+  var redis, key, count;
   return regeneratorRuntime.async(function rateLimit$(_context) {
     while (1) {
       switch (_context.prev = _context.next) {
         case 0:
-          _context.prev = 0;
-          key = "rate:".concat(req.ip);
-          _context.next = 4;
-          return regeneratorRuntime.awrap(redis.incr(key));
+          redis = getRedis(); // ✅ actual client
 
-        case 4:
-          current = _context.sent;
-
-          if (!(current === 1)) {
-            _context.next = 8;
+          if (redis) {
+            _context.next = 3;
             break;
           }
 
-          _context.next = 8;
-          return regeneratorRuntime.awrap(redis.expire(key, WINDOW_SECONDS));
+          return _context.abrupt("return", res.status(500).json({
+            message: "Redis not connected"
+          }));
 
-        case 8:
-          if (!(current > MAX_REQUESTS)) {
+        case 3:
+          key = "rate:".concat(req.ip);
+          _context.next = 6;
+          return regeneratorRuntime.awrap(redis.incr(key));
+
+        case 6:
+          count = _context.sent;
+
+          if (!(count === 1)) {
             _context.next = 10;
             break;
           }
 
-          return _context.abrupt("return", res.status(429).json({
-            success: false,
-            message: "Too many requests. Please slow down."
-          }));
+          _context.next = 10;
+          return regeneratorRuntime.awrap(redis.expire(key, 60));
 
         case 10:
+          if (!(count > 100)) {
+            _context.next = 12;
+            break;
+          }
+
+          return _context.abrupt("return", res.status(429).json({
+            message: "Too many requests"
+          }));
+
+        case 12:
           next();
-          _context.next = 17;
-          break;
 
         case 13:
-          _context.prev = 13;
-          _context.t0 = _context["catch"](0);
-          console.error("Rate limit error:", _context.t0.message);
-          next();
-
-        case 17:
         case "end":
           return _context.stop();
       }
     }
-  }, null, null, [[0, 13]]);
-}
+  });
+};
 
 module.exports = rateLimit;
