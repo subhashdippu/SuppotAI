@@ -1,0 +1,14 @@
+function errorHandler(err, req, res, next) {
+  console.error("Error:", err);
+
+  const statusCode = err.statusCode || 500;
+  const message =
+    err.message || "Something went wrong. Please try again later.";
+
+  res.status(statusCode).json({
+    success: false,
+    message,
+  });
+}
+
+module.exports = errorHandler;
