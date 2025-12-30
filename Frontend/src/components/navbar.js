@@ -1,87 +1,89 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
 
-function Navbar() {
+const API_URL = "http://localhost:5001/chat/message";
+
+export default function ChatWidget() {
+  const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [sessionId, setSessionId] = useState(null);
+  const bottomRef = useRef(null);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, loading]);
+
+  async function sendMessage() {
+    if (!input.trim() || loading) return;
+
+    const text = input;
+    setInput("");
+    setLoading(true);
+
+    setMessages((prev) => [...prev, { sender: "user", text }]);
+
+    try {
+      const res = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: text, sessionId }),
+      });
+
+      const data = await res.json();
+      setSessionId(data.sessionId);
+
+      setMessages((prev) => [...prev, { sender: "ai", text: data.reply }]);
+    } catch {
+      setMessages((prev) => [
+        ...prev,
+        { sender: "ai", text: "⚠️ Something went wrong." },
+      ]);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
-    <div className="navbar px-11 bg-gray-400 ">
-      <div className="navbar-start ">
-        <div className="dropdown">
-          <div tabIndex={0} role="button" className="btn btn-ghost btn-circle">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M4 6h16M4 12h16M4 18h7"
-              />
-            </svg>
-          </div>
-          <ul
-            tabIndex={0}
-            className="menu menu-sm dropdown-content bg-ghost-100 rounded-box z-[1] mt-3 w-20 p-4 shadow"
+    <div className="h-full flex flex-col">
+      <div className="p-4 border-b font-semibold">Live AI Support</div>
+
+      <div className="flex-1 overflow-y-auto p-4 space-y-3">
+        {messages.map((m, i) => (
+          <div
+            key={i}
+            className={`max-w-[80%] px-4 py-2 rounded-lg text-sm ${
+              m.sender === "user"
+                ? "ml-auto bg-blue-600 text-white"
+                : "bg-slate-200"
+            }`}
           >
-            <Link to="/">
-              <a className="btn-ghost py-1">Home</a>
-            </Link>
-            <Link to="/signup">
-              <a className="btn-ghost py-1">SignUp</a>
-            </Link>
-            <Link to="/signin">
-              <a className="btn-ghost py-1">SignIn</a>
-            </Link>
-          </ul>
-        </div>
-      </div>
-      <div className="navbar-center">
-        <Link>
-          <a className="btn btn-ghost text-xl">FriendFinder</a>
-        </Link>
-      </div>
-      <div className="navbar-end">
-        <button className="btn btn-ghost btn-circle">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-5 w-5"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-            />
-          </svg>
-        </button>
-        <button className="btn btn-ghost btn-circle">
-          <div className="indicator">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-              />
-            </svg>
-            <span className="badge badge-xs badge-primary indicator-item"></span>
+            {m.text}
           </div>
+        ))}
+
+        {loading && (
+          <div className="text-sm text-slate-500">Agent is typing…</div>
+        )}
+
+        <div ref={bottomRef} />
+      </div>
+
+      <div className="border-t p-3 flex gap-2">
+        <input
+          className="flex-1 border rounded-lg px-3 py-2 text-sm"
+          placeholder="Ask a question…"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+        />
+        <button
+          onClick={sendMessage}
+          disabled={loading}
+          className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm"
+        >
+          Send
         </button>
       </div>
     </div>
   );
 }
-
-export default Navbar;
